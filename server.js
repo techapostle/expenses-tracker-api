@@ -3,9 +3,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const Expense = require("./models/Expense");
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Replace the following with your MongoDB Atlas connection string
-const MONGO_URI = "YOUR_MONGODB_ATLAS_CONNECTION_STRING";
+const MONGO_URI = process.env.MONGO_URI;
 
 const app = express();
 
@@ -19,6 +22,12 @@ mongoose
   .catch((err) => console.log(err));
 
 // Routes
+
+// Default route
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
+
 app.post("/api/add-expense", async (req, res) => {
   const { description, amount, category, notes } = req.body;
 
@@ -86,14 +95,11 @@ app.delete("/api/delete-expense/:id", async (req, res) => {
 });
 
 // calculate the total amount of expenses
-app.get("/api/total-expenses", async (req, res) => {
+app.get("/api/balance", async (req, res) => {
   try {
     const expenses = await Expense.find();
-    const totalExpenses = expenses.reduce(
-      (acc, expense) => acc + expense.amount,
-      0
-    );
-    res.json({ totalExpenses });
+    const total = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+    res.json(total);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
